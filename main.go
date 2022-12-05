@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"log"
 
-	"sqlc-tutorial/sqlc"
+	"sqlc-tutorial/db/sqlc"
 
 	_ "github.com/lib/pq"
 )
@@ -27,8 +27,21 @@ func run() error {
 	}
 	log.Println(accounts)
 
-	// create an account
+	accountParams := sqlc.CreateAccountParams{
+		Owner:    "Jorge Numa",
+		Balance:  1000,
+		Currency: "COP",
+	}
 
+	// create an account
+	insertedAccount, err := queries.CreateAccount(ctx, accountParams)
+
+	if err != nil {
+		return err
+	}
+	log.Println("Inserted", insertedAccount)
+
+	return nil
 }
 
 func main() {

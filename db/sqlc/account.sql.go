@@ -70,3 +70,37 @@ func (q *Queries) ListAccount(ctx context.Context) ([]Account, error) {
 	}
 	return items, nil
 }
+
+const listAccountLimit = `-- name: ListAccountLimit :many
+SELECT id, owner, balance, currency, created_at FROM account
+ORDER BY owner LIMIT $1
+`
+
+func (q *Queries) ListAccountLimit(ctx context.Context, limit int32) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, listAccountLimit, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
